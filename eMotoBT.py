@@ -21,7 +21,7 @@ def read_serial(serial):
 		try:
 			print "reading..."
 			data  = serial.read(1)
-			print data
+			
 			
 		except Exception, e:
 			raise

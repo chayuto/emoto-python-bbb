@@ -2,6 +2,7 @@
 from eMotoAuthen import getToken,login 
 from eMotoAds import getAdsSchedule,Ads,AdsScheduleEntry
 import eMotoBT 
+import time
 
 from wand.image import Image
 from wand.display import display
@@ -18,8 +19,7 @@ print 'rethrieve Ads Schedule'
 
 scheduleList =  getAdsSchedule(getToken());
 
-imageURL = "" 
-ads = None
+allAdsList = []
 
 for scheduleEntry in scheduleList: 
 	print ''
@@ -34,26 +34,35 @@ for scheduleEntry in scheduleList:
 		print "    Description: "+adsObj.getDescription();
 		print "    URL: "+adsObj.getUrl();
 		imageURL =  adsObj.getUrl();
-		ads =  adsObj;
+		allAdsList.append(adsObj);
+		
+print 'start Display loop'
+print 'size: ' + str(len(allAdsList))
+for adsObj in allAdsList:
 
-imageData= ads.getAdsImageData()
-with Image(file=imageData) as img:
-	print('format =', img.format)
-	print('size =', img.size);
-	width = img.width
-	height = img.height
+	imageData= adsObj.getAdsImageData()
+	with Image(file=imageData) as img:
+		print('format =', img.format)
+		print('size =', img.size);
+		width = img.width
+		height = img.height
+		display(img);
+		time.sleep(5.5)
 
-
+'''
 print 'Server Testing Completed...'
 print 'Starting BT Service Thread...'
 
 eMotoBT.BTInit();
-
-
-
 '''
-	display(img);
-'''
+
+
+
+
+
+
+	
+
 
 
 
