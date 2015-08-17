@@ -47,26 +47,27 @@ def write_serial(serial):
 		except Exception, e:
 			raise
 
-UART.setup("UART2")
- 
-ser = serial.Serial(port = "/dev/ttyO2", baudrate=9600)
-ser.close()
-ser.open()
-if ser.isOpen():
-	print "Serial is open!"
-	# Create two threads as follows
-	try:
-		# Create new threads
-		thread1 = readThread(1, ser)
-		thread2 = writeThread(2,ser)
-		# Start new Threads
-		thread1.start()
-		thread2.start()
+def BTInit():
+	UART.setup("UART2")
+	 
+	ser = serial.Serial(port = "/dev/ttyO2", baudrate=9600)
+	ser.close()
+	ser.open()
+	if ser.isOpen():
+		print "Serial is open!"
+		# Create two threads as follows
+		try:
+			# Create new threads
+			thread1 = readThread(1, ser)
+			thread2 = writeThread(2,ser)
+			# Start new Threads
+			thread1.start()
+			thread2.start()
 
 
-	except Exception, e:
-		print e
-		print "Error: unable to start thread"
+		except Exception, e:
+			print e
+			print "Error: unable to start thread"
 
 
 	

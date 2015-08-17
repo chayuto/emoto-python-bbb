@@ -1,12 +1,13 @@
 #!/usr/bin/python
 from eMotoAuthen import getToken,login 
 from eMotoAds import getAdsSchedule,Ads,AdsScheduleEntry
+import eMotoBT 
 
 from wand.image import Image
 from wand.display import display
 
 print "===================================="
-print "  eMotoCell Script V0.0815.1636   "
+print "  eMotoCell Script V0.0817.1325   "
 print "===================================="
 
 loginResponse = login('cGV0ZXIuYXlyZUBlbW90b3ZhdGUuY29tOnBhc3N3b3Jk');
@@ -41,6 +42,14 @@ with Image(file=imageData) as img:
 	print('size =', img.size);
 	width = img.width
 	height = img.height
+
+
+print 'Server Testing Completed...'
+print 'Starting BT Service Thread...'
+
+eMotoBT.BTInit();
+
+
 
 '''
 	display(img);
