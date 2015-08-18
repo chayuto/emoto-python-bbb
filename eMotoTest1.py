@@ -2,6 +2,7 @@
 from eMotoAuthen import getToken,login 
 from eMotoAds import getAdsSchedule,Ads,AdsScheduleEntry
 import eMotoBT 
+import eMotoWifi
 import time
 
 from wand.image import Image
@@ -10,6 +11,10 @@ from wand.display import display
 print "===================================="
 print "  eMotoCell Script V0.0817.1325   "
 print "===================================="
+
+
+eMotoWifi.setupWifiScheme('379','csek17l3');
+eMotoWifi.connectToSavedWifi();
 
 loginResponse = login('cGV0ZXIuYXlyZUBlbW90b3ZhdGUuY29tOnBhc3N3b3Jk');
 
@@ -37,16 +42,16 @@ for scheduleEntry in scheduleList:
 		allAdsList.append(adsObj);
 		
 print 'start Display loop'
-print 'size: ' + str(len(allAdsList))
+print 'List size: ' + str(len(allAdsList))
 for adsObj in allAdsList:
-
+	print 'Displaying: ' + adsObj.getID() 
 	imageData= adsObj.getAdsImageData()
 	with Image(file=imageData) as img:
 		print('format =', img.format)
 		print('size =', img.size);
 		width = img.width
 		height = img.height
-		display(img);
+		#display(img);
 		time.sleep(5.5)
 
 '''
