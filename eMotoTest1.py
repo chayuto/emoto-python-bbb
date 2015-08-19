@@ -9,13 +9,23 @@ from wand.image import Image
 from wand.display import display
 
 print "===================================="
-print "  eMotoCell Script V0.0817.1325   "
+print "  eMotoCell Script V0.0819.1522   "
 print "===================================="
 
+print 'Testing BT functionality...'
 
-eMotoWifi.setupWifiScheme('379','csek17l3');
+eMotoBT.BT_init();
+for i in range (1,30):
+	time.sleep(1)
+	print str(30 - i) + '...'
+eMotoBT.BT_close();
+exit()
+
+
+#eMotoWifi.setupWifiScheme('379','csek17l3');
 eMotoWifi.connectToSavedWifi();
 
+print 'Testing Server functionality...'
 loginResponse = login('cGV0ZXIuYXlyZUBlbW90b3ZhdGUuY29tOnBhc3N3b3Jk');
 
 print 'token:' + getToken();
@@ -54,12 +64,8 @@ for adsObj in allAdsList:
 		#display(img);
 		time.sleep(5.5)
 
-'''
-print 'Server Testing Completed...'
-print 'Starting BT Service Thread...'
 
-eMotoBT.BTInit();
-'''
+
 
 
 
