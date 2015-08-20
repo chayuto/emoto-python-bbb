@@ -55,37 +55,43 @@ def getAdsScheduleCallBack(scheduleList):
 		'''
 	print threading.activeCount()
 
-print "===================================="
-print "  eMotoCell Script V0.0819.1929  "
-print "===================================="
+while True:
+	
+	print "===================================="
+	print "  eMotoCell Script V0.0820.1236"
+	print "===================================="
 
+	print '1) Testing BT functionality'
+	print '2) Testing Wifi functionality'
+	print '3) Testing Server functionality'
+	print '0) Exit'
+	
+	try:
+		choice = eval(raw_input('Choose functionality to run:'))
 
-print 'Testing BT functionality...'
+		if choice == 1:
+			print 'Testing BT functionality...'
+			eMotoBT.BT_init();
+			keypress = raw_input('Press enter to continue...')
+			eMotoBT.BT_close();
 
-eMotoBT.BT_init();
+		elif choice == 2:
+			print 'Testing Wifi functionality...'
+			eMotoWifi.setupWifiScheme('379','csek17l3');
+			eMotoWifi.connectToSavedWifi();
 
-'''
-for i in range (1,30):
-	time.sleep(1)
-	print str(30 - i) + '...'
-eMotoBT.BT_close();
-exit()
-'''
+		elif choice == 3:
+			print 'Testing Server functionality...'
+			login('cGV0ZXIuYXlyZUBlbW90b3ZhdGUuY29tOnBhc3N3b3Jk',loginSucessCallback,loginFailCallback);
 
-'''
-print 'Testing Wifi functionality...'
-eMotoWifi.setupWifiScheme('379','csek17l3');
-eMotoWifi.connectToSavedWifi();
-'''
+		elif choice == 0:
+			exit();
 
-'''
-print 'Testing Server functionality...'
+		else:
+			print 'invalid choice'
 
-login('cGV0ZXIuYXlyZUBlbW90b3ZhdGUuY29tOnBhc3N3b3Jk',loginSucessCallback,loginFailCallback);
-'''
-
-
-
+	except Exception:
+		pass
 
 
 

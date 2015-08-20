@@ -21,12 +21,13 @@ class asyncAuthenThread(threading.Thread):
 		data = []
 
 		try:
-			
+			'''
 			ctx = ssl.create_default_context()
 			ctx.check_hostname = False
 			ctx.verify_mode = ssl.CERT_NONE
+			'''
 
-			response = urllib2.urlopen(req, json.dumps(data) ,context=ctx)
+			response = urllib2.urlopen(req, json.dumps(data) ) #,context=ctx)
 
 			data = response.read()
 			jsonResponse =  json.loads(data)

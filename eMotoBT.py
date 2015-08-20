@@ -33,6 +33,7 @@ class readThread(threading.Thread):
         threading.Thread.__init__(self)
     def run(self):
         print "Starting Read Thread..." 
+        read_serial()
 
 # Define a function for the thread
 def read_serial():
@@ -64,36 +65,46 @@ def serial_Read_Header():
 		print 'trasaction ID:' + str(ord(header[0]))
 		cmdID = ord(header[1])
 		print str(cmdID)
-		print 'size0:' + str(ord(header[2]))
-		print 'size1:' + str(ord(header[3]))
-		print 'headerCRC:' + str(ord(header[4]))
-		print 'contentCRC:' + str(ord(header[5]))
+		print 'size0:%X' % ord(header[2])
+		print 'size1:%X' % ord(header[3])
+		print 'headerCRC:%X' % ord(header[4])
+		print 'contentCRC:%X' % ord(header[5])
 
 		contentSize = ord(header[2])*256 + ord(header[3])
 
 		contentBytes =  ser.read(6)
-			if len(contentBytes) > 0:
-				if cmdID == SET_COMMAND:
-					analyse_SET_content_bytes(header,contentBytes);
-				else if cmdID ==GET_COMMAND:
-
-			else:
-				print 'Error Len 0'
+		if len(contentBytes) > 0:
+			print 'Contents:' + contentBytes.encode('hex')
+			if cmdID == SET_COMMAND:
+				analyse_SET_content_bytes(header,contentBytes);
+			elif cmdID ==GET_COMMAND:
+				analyse_GET_content_bytes(header,contentBytes);
+		else:
+			print 'Error Len 0'
 	else:
 		print 'Error Len 0'
 
 def varify_packet(headerBytes,contentBytes):
 	return True
 
-def analyse_SET_content_bytes(headerBytes,contentBytes):
-	print '%X' % ord(contentBytes[0])
-	pass
+def analyse_SET_content_bytes(headerBytes,contentBytes):	
+	
+	did = ord(contentBytes[0])
+
+	print 'DID:%X' % did
+	
 
 def analyse_GET_content_bytes(headerBytes,contentBytes):
-	print '%X' % ord(contentBytes[0])
-	pass
+	
+	did = ord(contentBytes[0])
+	print 'DID:%X' % did
 
-def send_ACK:
+	if DID_DEVICE_ID == did:
+		pass
+
+	
+
+def send_ACK():
 	pass
 
 

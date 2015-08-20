@@ -30,12 +30,14 @@ class asyncThread(threading.Thread):
 		self.callBackIntern = callBackIntern
 		self.url = url
 	def run(self):
+		'''
 		ctx = ssl.create_default_context()
 		ctx.check_hostname = False
 		ctx.verify_mode = ssl.CERT_NONE
+		'''
 		req = urllib2.Request(self.url)
 		#req.add_header('Content-Type', 'application/json')
-		response = urllib2.urlopen(req,context=ctx)
+		response = urllib2.urlopen(req ) #,context=ctx)
 		data = response.read()
 		self.callBackIntern(data,self.callBackExtern)
 
