@@ -3,6 +3,8 @@ import threading,time
 import Adafruit_BBIO.UART as UART
 import serial
 import struct
+
+from Crc import  CrcRegister,CRC8_CCITT
  
 #Flags
 PREAMBLE0 = 0xEC;
@@ -51,9 +53,9 @@ def read_serial():
 							serial_Read_Header()
 							
 					else:
-						print 'Error Len 0'
+						print 'Read Timeout'
 			else:
-				print 'Error Len 0'
+				print 'Read Timeout'
 
 		except Exception, e:
 			raise
@@ -62,27 +64,41 @@ def serial_Read_Header():
 	header =  ser.read(6)
 	if len(header) > 0:
 		print 'Header:' + header.encode('hex')
-		print 'trasaction ID:' + str(ord(header[0]))
+		txnID = ord(header[0])
+		print 'trasaction ID:' + str(txnID)
 		cmdID = ord(header[1])
-		print str(cmdID)
+		print 'CMD ID:'+ str(cmdID)
 		print 'size0:%X' % ord(header[2])
 		print 'size1:%X' % ord(header[3])
-		print 'headerCRC:%X' % ord(header[4])
-		print 'contentCRC:%X' % ord(header[5])
+		print 'contentCRC:%X' % ord(header[4])
+		print 'headerCRC:%X' % ord(header[5])
 
-		contentSize = ord(header[2])*256 + ord(header[3])
+		contentSize = ord(header[3]) * 256 + ord(header[2])
 
-		contentBytes =  ser.read(6)
+		headerList = [PREAMBLE0, PREAMBLE1]
+		for i in range(0,4):
+			headerList.append(ord(header[i]))
+
+		crc = CrcRegister(CRC8_CCITT)
+		print headerList
+		crc.takeList(headerList)
+		print 'Computed CRC: %X' % crc.getFinalValue()
+
+		contentBytes =  ser.read(contentSize)
 		if len(contentBytes) > 0:
+
+			send_ACK(txnID)
+
 			print 'Contents:' + contentBytes.encode('hex')
 			if cmdID == SET_COMMAND:
 				analyse_SET_content_bytes(header,contentBytes);
+
 			elif cmdID ==GET_COMMAND:
 				analyse_GET_content_bytes(header,contentBytes);
 		else:
-			print 'Error Len 0'
+			print 'Read Timeout'
 	else:
-		print 'Error Len 0'
+		print 'Read Timeout'
 
 def varify_packet(headerBytes,contentBytes):
 	return True
@@ -104,7 +120,41 @@ def analyse_GET_content_bytes(headerBytes,contentBytes):
 
 	
 
-def send_ACK():
+def send_ACK(txnID):
+
+	#test content
+	content = [0x02,0x23,0x04]
+	contentSize = len(content)
+	contentSize0 = contentSize%256
+	contentSize1 = contentSize//256
+	headerList = [PREAMBLE0, PREAMBLE1,txnID, ACK_COMMAND,contentSize0,contentSize1]
+		
+	#get content CRC
+	crc = CrcRegister(CRC8_CCITT)
+	crc.takeList(content)
+	contentCRC = crc.getFinalValue()
+	print 'Computed content CRC: %X' % contentCRC
+
+	headerList.append(int(contentCRC))
+
+	#get header CRC
+	crc = CrcRegister(CRC8_CCITT)
+	crc.takeList(headerList)
+	headerCRC = crc.getFinalValue()
+	print 'Computed header CRC: %X' % headerCRC
+
+	#build payload
+	headerList.append(int(headerCRC))
+	payloadList = headerList + content 
+	print payloadList
+	
+
+	print 'Sending...' +str(len(payloadList)) 
+
+
+
+	write_serial( ''.join([chr(i) for i in payloadList ]) ) ;
+
 	pass
 
 

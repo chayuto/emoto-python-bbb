@@ -415,6 +415,14 @@ class CrcRegister:
         for c in s:
             self.takeWord(ord(c))
 
+    def takeList(self, valueList):
+        """
+        Process a string as input.  It is handled as a sequence of
+        8-bit integers.
+        """
+        for val in valueList:
+            self.takeWord(int(val))
+
     def getValue(self):
         """
         Return the current value of the register as an integer.
