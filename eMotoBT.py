@@ -24,6 +24,8 @@ DID_IMG_INFO	= 0x20;
 DID_IMG_DATA 	= 0x21;
 DID_IMG_ONLIST 	= 0x22;
 
+DID_WIFI_SETUP = 0x30;
+
 exit_Flag = 0;
 serial_Init_Flag = 0
 ser = None;
@@ -42,7 +44,7 @@ def read_serial():
 	print "serial Read thread started"
 	while (not exit_Flag) and serial_Init_Flag :
 		try:
-			print "reading..."
+			#print "reading..."
 			data  = ser.read(1)
 			if len(data) > 0:
 				if ord(data) == PREAMBLE0:
@@ -53,9 +55,11 @@ def read_serial():
 							serial_Read_Header()
 							
 					else:
-						print 'Read Timeout'
+						#print 'Read Timeout'
+						pass
 			else:
-				print 'Read Timeout'
+				#print 'Read Timeout'
+				pass
 
 		except Exception, e:
 			raise
@@ -75,8 +79,10 @@ def serial_Read_Header():
 
 		contentSize = ord(header[3]) * 256 + ord(header[2])
 
+		print 'contentSize:' + str(contentSize)
+
 		headerList = [PREAMBLE0, PREAMBLE1]
-		for i in range(0,4):
+		for i in range(0,5):
 			headerList.append(ord(header[i]))
 
 		crc = CrcRegister(CRC8_CCITT)
@@ -87,18 +93,22 @@ def serial_Read_Header():
 		contentBytes =  ser.read(contentSize)
 		if len(contentBytes) > 0:
 
-			send_ACK(txnID)
-
 			print 'Contents:' + contentBytes.encode('hex')
 			if cmdID == SET_COMMAND:
 				analyse_SET_content_bytes(header,contentBytes);
 
 			elif cmdID ==GET_COMMAND:
 				analyse_GET_content_bytes(header,contentBytes);
+
+			#sending ack to the phone
+			send_ACK(txnID)
+
 		else:
-			print 'Read Timeout'
+			#print 'Read Timeout'
+			pass
 	else:
-		print 'Read Timeout'
+		#print 'Read Timeout'
+		pass
 
 def varify_packet(headerBytes,contentBytes):
 	return True
@@ -107,21 +117,32 @@ def analyse_SET_content_bytes(headerBytes,contentBytes):
 	
 	did = ord(contentBytes[0])
 
-	print 'DID:%X' % did
+	print 'SET DID:%X' % did
+
+	if did == DID_WIFI_SETUP :
+		print "SET DID_WIFI_SETUP"
+		SSID = contentBytes[1:20]
+		sec = contentBytes[21]
+		key = contentBytes[22:61]
+
+		print "SSID: " + SSID
+		print "Sec Type: " + str(ord(sec)) 
+		print "Key: " + key
+
+		pass
 	
 
 def analyse_GET_content_bytes(headerBytes,contentBytes):
 	
 	did = ord(contentBytes[0])
-	print 'DID:%X' % did
+	print 'GET DID:%X' % did
 
 	if DID_DEVICE_ID == did:
 		pass
 
-	
-
 def send_ACK(txnID):
 
+	print 'sending ACK:'
 	#test content
 	content = [0x02,0x23,0x04]
 	contentSize = len(content)
@@ -149,9 +170,7 @@ def send_ACK(txnID):
 	print payloadList
 	
 
-	print 'Sending...' +str(len(payloadList)) 
-
-
+	print 'Sending:' +str(len(payloadList)) +' bytes'
 
 	write_serial( ''.join([chr(i) for i in payloadList ]) ) ;
 
