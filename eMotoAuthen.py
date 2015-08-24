@@ -41,7 +41,6 @@ class asyncAuthenThread(threading.Thread):
 			raise
 		
 
-
 def login(credential,successCallBack,failureCallBack):
 	global token,storedCredential
 	storedCredential = credential

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from eMotoBTPacket import Packet 
 import threading,time
 import Adafruit_BBIO.UART as UART
 import serial
@@ -29,6 +30,7 @@ DID_WIFI_SETUP = 0x30;
 exit_Flag = 0;
 serial_Init_Flag = 0
 ser = None;
+serial_timeout = 2
 
 threads = []
 
@@ -53,7 +55,6 @@ def read_serial():
 						if ord(data) == PREAMBLE1:
 							print 'preamble detected!'
 							serial_Read_Header()
-							
 					else:
 						#print 'Read Timeout'
 						pass
@@ -93,15 +94,15 @@ def serial_Read_Header():
 		contentBytes =  ser.read(contentSize)
 		if len(contentBytes) > 0:
 
+			mPacket = Packet(header,contentBytes);
+
 			print 'Contents:' + contentBytes.encode('hex')
 			if cmdID == SET_COMMAND:
-				analyse_SET_content_bytes(header,contentBytes);
+				analyse_SET_content(mPacket);
+				
 
 			elif cmdID ==GET_COMMAND:
-				analyse_GET_content_bytes(header,contentBytes);
-
-			#sending ack to the phone
-			send_ACK(txnID)
+				analyse_GET_content(mPacket);
 
 		else:
 			#print 'Read Timeout'
@@ -110,17 +111,20 @@ def serial_Read_Header():
 		#print 'Read Timeout'
 		pass
 
-def varify_packet(headerBytes,contentBytes):
+def varify_packet(packet):
 	return True
 
-def analyse_SET_content_bytes(headerBytes,contentBytes):	
+def analyse_SET_content(packet):	
 	
-	did = ord(contentBytes[0])
+	did = packet.getDID()
+	txnID = packet.getTxnID()
 
 	print 'SET DID:%X' % did
 
 	if did == DID_WIFI_SETUP :
 		print "SET DID_WIFI_SETUP"
+
+		contentBytes = packet.getContentBytes()
 		SSID = contentBytes[1:20]
 		sec = contentBytes[21]
 		key = contentBytes[22:61]
@@ -129,22 +133,47 @@ def analyse_SET_content_bytes(headerBytes,contentBytes):
 		print "Sec Type: " + str(ord(sec)) 
 		print "Key: " + key
 
+		#sending ack to the phone
+		send_ACK(txnID,[0x02,0x23,0x04])
+
 		pass
+
+	elif did == DID_IMG_ONLIST:
+		print "SET DID_IMG_ONLIST"
+		send_ACK(txnID,[0x02,0x23,0x04])
+		pass
+	elif did == DID_IMG_DATA:
+		print "SET DID_IMG_DATA"
+		send_ACK(txnID,[0x02,0x23,0x04])
+		pass
+
 	
 
-def analyse_GET_content_bytes(headerBytes,contentBytes):
+def analyse_GET_content(packet):
 	
-	did = ord(contentBytes[0])
+	did = packet.getDID()
+	txnID = packet.getTxnID()
+
 	print 'GET DID:%X' % did
 
-	if DID_DEVICE_ID == did:
+	if did == DID_DEVICE_ID:
+		send_ACK(txnID,[0x00,0x00,0x00,0x00])
+		pass
+	elif did == DID_PROTOCOL:
+		send_ACK(txnID,[0x00,0x00])
+		pass
+	elif did == DID_FW_VERSION:
+		send_ACK(txnID,[0x00,0x00])
+		pass
+	elif did == DID_HW_VERSION:
+		send_ACK(txnID,[0x00,0x00])
 		pass
 
-def send_ACK(txnID):
+
+
+def send_ACK(txnID,content):
 
 	print 'sending ACK:'
-	#test content
-	content = [0x02,0x23,0x04]
 	contentSize = len(content)
 	contentSize0 = contentSize%256
 	contentSize1 = contentSize//256
@@ -182,7 +211,7 @@ class writeThread(threading.Thread):
         threading.Thread.__init__(self)
         self.bytes = bytes
     def run(self):
-        print "Starting Write Thread..." 
+        #print "Starting Write Thread..." 
         ser.write(self.bytes)
 
 # Define a function for the thread
@@ -209,7 +238,7 @@ def BT_init():
 	UART.setup("UART2")
 	 
 	ser = serial.Serial(port = "/dev/ttyO2", baudrate=9600)
-	ser.timeout= 5
+	ser.timeout= serial_timeout
 	ser.close()
 	ser.open()
 	if ser.isOpen():
