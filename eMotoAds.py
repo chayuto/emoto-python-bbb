@@ -1,16 +1,18 @@
 #!/usr/bin/python
+import threading
 import urllib2
 import json
+import ssl
 
-def getAdsSchedule(token):
+
+def getAdsSchedule(token,callBackExtern):
 	url = 'https://emotovate.com/api/ads/all/'+token+'?deviceId=00000000&lat=null&lng=null';
-	req = urllib2.Request(url)
-	#req.add_header('Content-Type', 'application/json')
+	thread1 = asyncThread(callBackExtern,dataToscheduleList,url)
+	# Start new Threads
+	thread1.start()
+	
 
-	response = urllib2.urlopen(req)
-
-	data = response.read()
-
+def dataToscheduleList(data,callBack):
 	scheduleListJson = json.loads(data)
 
 	scheduleList = []
@@ -18,7 +20,27 @@ def getAdsSchedule(token):
 		scheduleEntry = AdsScheduleEntry(scheduleEntryJson);
 		scheduleList.append(scheduleEntry)
 
-	return scheduleList
+	callBack(scheduleList);
+
+
+class asyncThread(threading.Thread):
+	def __init__(self,callBackExtern,callBackIntern,url):
+		threading.Thread.__init__(self)
+		self.callBackExtern = callBackExtern
+		self.callBackIntern = callBackIntern
+		self.url = url
+	def run(self):
+		'''
+		ctx = ssl.create_default_context()
+		ctx.check_hostname = False
+		ctx.verify_mode = ssl.CERT_NONE
+		'''
+		req = urllib2.Request(self.url)
+		#req.add_header('Content-Type', 'application/json')
+		response = urllib2.urlopen(req ) #,context=ctx)
+		data = response.read()
+		self.callBackIntern(data,self.callBackExtern)
+
 
 class AdsScheduleEntry:
 
