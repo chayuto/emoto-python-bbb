@@ -77,7 +77,7 @@ while True:
 
 		elif choice == 2:
 			print 'Testing Wifi functionality...'
-			eMotoWifi.setupWifiScheme('379','csek17l3');
+			eMotoWifi.setupWifiScheme('OneForAll','@AwesomeHumbleAbode');
 			eMotoWifi.connectToSavedWifi();
 
 		elif choice == 3:

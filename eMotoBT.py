@@ -157,16 +157,16 @@ def analyse_GET_content(packet):
 	print 'GET DID:%X' % did
 
 	if did == DID_DEVICE_ID:
-		send_ACK(txnID,[0x00,0x00,0x00,0x00])
+		send_ACK(txnID,[DID_DEVICE_ID, 0x00,0x00,0x00,0x00])
 		pass
 	elif did == DID_PROTOCOL:
-		send_ACK(txnID,[0x00,0x00])
+		send_ACK(txnID,[DID_PROTOCOL,0x00,0x00])
 		pass
 	elif did == DID_FW_VERSION:
-		send_ACK(txnID,[0x00,0x00])
+		send_ACK(txnID,[DID_FW_VERSION,0x00,0x00])
 		pass
 	elif did == DID_HW_VERSION:
-		send_ACK(txnID,[0x00,0x00])
+		send_ACK(txnID,[DID_HW_VERSION,0x00,0x00])
 		pass
 
 

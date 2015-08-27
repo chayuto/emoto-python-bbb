@@ -16,6 +16,7 @@ def get_ip_address(ifname):
     )[20:24])
 
 def connectToSavedWifi():
+	
 	print 'connecting to Wifi'
 
 	'''
