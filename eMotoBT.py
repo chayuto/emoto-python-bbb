@@ -1,11 +1,10 @@
 #!/usr/bin/python
 from eMotoBTPacket import Packet 
+from eMotoUtill import getCRC8FromIntList,getCRC8FromString
 import threading,time
 import Adafruit_BBIO.UART as UART
 import serial
 import struct
-
-from Crc import  CrcRegister,CRC8_CCITT
  
 #Flags
 PREAMBLE0 = 0xEC;
@@ -26,6 +25,7 @@ DID_IMG_DATA 	= 0x21;
 DID_IMG_ONLIST 	= 0x22;
 
 DID_WIFI_SETUP = 0x30;
+DID_AUTHEN_SETUP = 0x31;
 
 exit_Flag = 0;
 serial_Init_Flag = 0
@@ -86,10 +86,8 @@ def serial_Read_Header():
 		for i in range(0,5):
 			headerList.append(ord(header[i]))
 
-		crc = CrcRegister(CRC8_CCITT)
 		print headerList
-		crc.takeList(headerList)
-		print 'Computed CRC: %X' % crc.getFinalValue()
+		print 'Computed CRC: %X' % getCRC8FromIntList(headerList)
 
 		contentBytes =  ser.read(contentSize)
 		if len(contentBytes) > 0:
@@ -111,9 +109,6 @@ def serial_Read_Header():
 		#print 'Read Timeout'
 		pass
 
-def varify_packet(packet):
-	return True
-
 def analyse_SET_content(packet):	
 	
 	did = packet.getDID()
@@ -133,10 +128,23 @@ def analyse_SET_content(packet):
 		print "Sec Type: " + str(ord(sec)) 
 		print "Key: " + key
 
+		#TODO: call wifimodule to store info in eMotoCell
+
+		#sending ack to the phone
+		send_ACK(txnID,[0x02,0x23,0x04])
+		pass
+
+	if did == DID_AUTHEN_SETUP:
+
+		print "SET DID_AUTHEN_SETUP"
+		contentBytes = packet.getContentBytes()
+		print "Credential: " + contentBytes 
+
+		#TODO: store credential in eMotoCell
+
 		#sending ack to the phone
 		send_ACK(txnID,[0x02,0x23,0x04])
 
-		pass
 
 	elif did == DID_IMG_ONLIST:
 		print "SET DID_IMG_ONLIST"
@@ -180,31 +188,25 @@ def send_ACK(txnID,content):
 	headerList = [PREAMBLE0, PREAMBLE1,txnID, ACK_COMMAND,contentSize0,contentSize1]
 		
 	#get content CRC
-	crc = CrcRegister(CRC8_CCITT)
-	crc.takeList(content)
-	contentCRC = crc.getFinalValue()
+	contentCRC = getCRC8FromIntList(content)
 	print 'Computed content CRC: %X' % contentCRC
 
 	headerList.append(int(contentCRC))
 
 	#get header CRC
-	crc = CrcRegister(CRC8_CCITT)
-	crc.takeList(headerList)
-	headerCRC = crc.getFinalValue()
+	headerCRC = getCRC8FromIntList(headerList)
 	print 'Computed header CRC: %X' % headerCRC
 
 	#build payload
 	headerList.append(int(headerCRC))
 	payloadList = headerList + content 
 	print payloadList
-	
 
 	print 'Sending:' +str(len(payloadList)) +' bytes'
 
 	write_serial( ''.join([chr(i) for i in payloadList ]) ) ;
 
 	pass
-
 
 class writeThread(threading.Thread):
     def __init__(self,bytes):

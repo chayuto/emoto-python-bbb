@@ -417,7 +417,7 @@ class CrcRegister:
 
     def takeList(self, valueList):
         """
-        Process a string as input.  It is handled as a sequence of
+        Process a int as input.  It is handled as a sequence of
         8-bit integers.
         """
         for val in valueList:

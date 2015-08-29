@@ -58,7 +58,7 @@ def getAdsScheduleCallBack(scheduleList):
 while True:
 	
 	print "===================================="
-	print "  eMotoCell Script V0.0823.1704"
+	print "  eMotoCell Script V0.0829.1433"
 	print "===================================="
 
 	print '1) Testing BT functionality'

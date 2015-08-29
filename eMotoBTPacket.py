@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
-
-from Crc import  CrcRegister,CRC8_CCITT
+import eMotoUtill
 
 #TODO: finish packet class
 
@@ -30,9 +29,13 @@ class Packet():
 		return ord(self.headerBytes[7])
 
 	def computeContentCRC(self):
-		pass
+		return eMotoUtill.getCRC8FromString(contentBytes);
+		
 
-	#check if the headerCRC,conentCRC and contentLength match
+	def computeHeaderCRC(self):
+		return eMotoUtill.getCRC8FromString(headerBytes);
+
+	#TODO: check if the headerCRC,conentCRC and contentLength match
 	def isValid(self):
 		pass
 
